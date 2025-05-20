@@ -23,8 +23,8 @@ jobs:
       run: |
         echo "Current directory contents:"
         ls -la
-        echo "Pickle_Test directory contents:"
-        ls -la Pickle_Test/
+        echo "Pickle_Test/analysis directory contents:"
+        ls -la Pickle_Test/analysis/
     
     - name: Install dependencies
       run: |
@@ -34,17 +34,8 @@ jobs:
           pip install -r Pickle_Test/requirements.txt
         fi
     
-    - name: Test with pytest
+    - name: Run notebook test
       run: |
-        # First check if the notebook exists
-        if [ ! -f "Pickle_Test/pickle_test_suite.ipynb" ]; then
-          echo "Error: pickle_test_suite.ipynb not found in Pickle_Test directory"
-          echo "Available files in Pickle_Test directory:"
-          ls -la Pickle_Test/
-          exit 1
-        fi
-        
-        # Convert notebook to Python script and run tests
         cd Pickle_Test
-        jupyter nbconvert --to python pickle_test_suite.ipynb
-        pytest pickle_test_suite.py -v
+        jupyter nbconvert --to python analysis/pickle_test_suite.ipynb
+        python analysis/pickle_test_suite.py
