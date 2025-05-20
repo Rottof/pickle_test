@@ -19,13 +19,32 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     
+    - name: List directory contents
+      run: |
+        echo "Current directory contents:"
+        ls -la
+        echo "Pickle_Test directory contents:"
+        ls -la Pickle_Test/
+    
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
         pip install jupyter nbconvert pytest
+        if [ -f "Pickle_Test/requirements.txt" ]; then
+          pip install -r Pickle_Test/requirements.txt
+        fi
     
     - name: Test with pytest
       run: |
+        # First check if the notebook exists
+        if [ ! -f "Pickle_Test/pickle_test_suite.ipynb" ]; then
+          echo "Error: pickle_test_suite.ipynb not found in Pickle_Test directory"
+          echo "Available files in Pickle_Test directory:"
+          ls -la Pickle_Test/
+          exit 1
+        fi
+        
         # Convert notebook to Python script and run tests
+        cd Pickle_Test
         jupyter nbconvert --to python pickle_test_suite.ipynb
         pytest pickle_test_suite.py -v
