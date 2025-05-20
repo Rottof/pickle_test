@@ -38,6 +38,9 @@ jobs:
     
     - name: Run notebook test
       shell: bash
+      env:
+        PYTHONIOENCODING: utf-8
+        PYTHONLEGACYWINDOWSSTDIO: utf-8
       run: |
         cd Pickle_Test
         # Convert notebook to Python script
