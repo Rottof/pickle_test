@@ -37,5 +37,14 @@ jobs:
     - name: Run notebook test
       run: |
         cd Pickle_Test
+        # Convert notebook to Python script
         jupyter nbconvert --to python analysis/pickle_test_suite.ipynb
-        python analysis/pickle_test_suite.py
+        
+        # Run the script and capture its output
+        if python analysis/pickle_test_suite.py; then
+          echo "✅ Notebook executed successfully"
+          exit 0
+        else
+          echo "❌ Notebook execution failed"
+          exit 1
+        fi
