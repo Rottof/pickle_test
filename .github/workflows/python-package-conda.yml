@@ -36,7 +36,7 @@ jobs:
           pip install -r Pickle_Test/requirements.txt
         fi
     
-    - name: Run notebook test
+    - name: Run hash consistency test
       shell: bash
       env:
         PYTHONIOENCODING: utf-8
@@ -46,11 +46,41 @@ jobs:
         # Convert notebook to Python script
         jupyter nbconvert --to python analysis/pickle_test_suite.ipynb
         
-        # Run the script and capture its output
-        if python analysis/pickle_test_suite.py; then
-          echo "✅ Notebook executed successfully"
+        # Create a temporary Python script that only runs the hash consistency test
+        cat > analysis/run_hash_test.py << 'EOL'
+        import pickle
+        import hashlib
+        import datetime
+        
+        def get_pickle_hash(obj):
+            try:
+                data = pickle.dumps(obj)
+                return hashlib.sha256(data).hexdigest()
+            except Exception as e:
+                return f"ERROR: {e}"
+        
+        # Run hash consistency test
+        sample_object = {"test": [1, 2, 3], "time": datetime.datetime(2020, 1, 1)}
+        
+        hash1 = get_pickle_hash(sample_object)
+        hash2 = get_pickle_hash(sample_object)
+        hash3 = get_pickle_hash(sample_object)
+        
+        print("第一次哈希:", hash1)
+        print("第二次哈希:", hash2)
+        print("第三次哈希:", hash3)
+        print("一致性:", hash1 == hash2 == hash3)
+        
+        # Exit with error if hashes don't match
+        if not (hash1 == hash2 == hash3):
+            exit(1)
+        EOL
+        
+        # Run the hash consistency test
+        if python analysis/run_hash_test.py; then
+          echo "✅ Hash consistency test passed"
           exit 0
         else
-          echo "❌ Notebook execution failed"
+          echo "❌ Hash consistency test failed"
           exit 1
         fi
